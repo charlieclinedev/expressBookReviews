@@ -4,6 +4,19 @@ let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
+async function getBookList() {
+    return JSON.stringify(books, null, 4);
+}
+
+async function getBookInfo(isbn) {
+    if (books[isbn]) {
+        return JSON.stringify(books[isbn]);
+    }
+    else {
+        return `{ "message": "isbn not found" }`
+    }
+}
+
 // Check if a user with the given username already exists
 const doesExist = (username) => {
     // Filter the users array for any user with the same username
@@ -38,19 +51,15 @@ public_users.post("/register", (req,res) => {
 });
 
 // Get the book list available in the shop
-public_users.get('/',function (req, res) {
-  return res.send(JSON.stringify(books, null, 4));
+public_users.get('/', async (req, res) => {
+    const bookList = await getBookList()
+    return res.send(bookList);
 });
 
 // Get book details based on ISBN
-public_users.get('/isbn/:isbn',function (req, res) {
-    let book_index = parseInt(req.params.isbn, 10);
-    if (books[book_index]) {
-        return res.send(JSON.stringify(books[book_index], null, 4));
-    }
-    else {
-        return res.status(300).json({message: "isbn not found"});
-    }
+public_users.get('/isbn/:isbn', async (req, res) => {
+    const bookInfo = await getBookInfo(req.params.isbn);
+    return res.send(bookInfo);
  });
   
 // Get book details based on author
