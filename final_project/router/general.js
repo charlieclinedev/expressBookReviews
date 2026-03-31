@@ -4,19 +4,6 @@ let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
-async function getBookList() {
-    return JSON.stringify(books, null, 4);
-}
-
-async function getBookInfo(isbn) {
-    if (books[isbn]) {
-        return JSON.stringify(books[isbn]);
-    }
-    else {
-        return `{ "message": "isbn not found" }`
-    }
-}
-
 // Check if a user with the given username already exists
 const doesExist = (username) => {
     // Filter the users array for any user with the same username
@@ -50,34 +37,57 @@ public_users.post("/register", (req,res) => {
     return res.status(404).json({message: "Unable to register user."});
 });
 
+async function getBookList() {
+    return JSON.stringify(books, null, 4);
+}
+
 // Get the book list available in the shop
 public_users.get('/', async (req, res) => {
     const bookList = await getBookList()
     return res.send(bookList);
 });
 
+async function getBookInfo(isbn) {
+    if (books[isbn]) {
+        return JSON.stringify(books[isbn]);
+    }
+    else {
+        return `{ "message": "isbn not found" }`
+    }
+}
+
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn', async (req, res) => {
     const bookInfo = await getBookInfo(req.params.isbn);
     return res.send(bookInfo);
  });
+
+ async function getBooksByAuthor(author) {
+     const out_books = Object.fromEntries(
+         Object.entries(books).filter(([key, value]) => {
+             return (value.author === author);
+         }));
+         return JSON.stringify(out_books, null, 4);
+ }
   
 // Get book details based on author
-public_users.get('/author/:author',function (req, res) {
-    const out_books = Object.fromEntries(
-        Object.entries(books).filter(([key, value]) => {
-            return (value.author === req.params.author);
-        }));
-    return res.send(JSON.stringify(out_books, null, 4));
+public_users.get('/author/:author', async (req, res) => {
+    const out_books = await getBooksByAuthor(req.params.author);
+    return res.send(out_books);
 });
 
-// Get all books based on title
-public_users.get('/title/:title',function (req, res) {
+async function getBooksByTitle(title) {
     const out_books = Object.fromEntries(
         Object.entries(books).filter(([key, value]) => {
-            return (value.title === req.params.title);
+            return (value.title === title);
         }));
-    return res.send(JSON.stringify(out_books, null, 4));
+    return JSON.stringify(out_books, null, 4);
+}
+
+// Get all books based on title
+public_users.get('/title/:title',async (req, res) => {
+    out_books = await getBooksByTitle(req.params.title);
+    return res.send(out_books);
 });
 
 //  Get book review
