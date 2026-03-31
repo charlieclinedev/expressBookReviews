@@ -65,8 +65,23 @@ regd_users.post("/login", (req,res) => {
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
     books[req.params.isbn].reviews[req.session.authorization.username] = req.query.review;
-    res.send(`Book review added from ${req.session.authorization.username} - ${req.query.review}`);
+    return res.send(`Book review added from ${req.session.authorization.username} - ${req.query.review}`);
 });
+
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    if (!books[req.params.isbn]) {
+        return res.status(208).json({ message: "Invalid ISBN" });
+    }
+
+    const username = req.session.authorization.username;
+    if (!books[req.params.isbn].reviews[username]) {
+        return res.status(208).json({ message: "No reviews found with the current username" });
+    }
+    
+    delete books[req.params.isbn].reviews[username];
+
+    return res.send(`Review for ISBN - ${req.params.isbn} by user ${username} has been removed`);
+})
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
