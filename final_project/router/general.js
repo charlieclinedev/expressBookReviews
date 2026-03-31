@@ -60,7 +60,7 @@ public_users.get('/isbn/:isbn',function (req, res) {
         return res.send(JSON.stringify(books[book_index], null, 4));
     }
     else {
-        return res.status(300).json({message: "isbn not found"});
+        return res.status(404).json({message: `Book with ISBN ${book_index} not found.`});
     }
  });
 
@@ -88,7 +88,12 @@ public_users.get('/author/:author',function (req, res) {
 });
 
 public_users.get('/author/:author', async function (req, res) {
-
+    try {
+        const response = await axios.get(`https://localhost:5000/author/${encodeURIComponent(author)}`);
+        res.status(200).json(response.data);
+    } catch (error) {
+        res.status(404).json({ message: "Author not found", error: error.message});
+    }
 });
 
 // Get all books based on title
@@ -100,6 +105,15 @@ public_users.get('/title/:title',function (req, res) {
     return res.send(JSON.stringify(out_books, null, 4));
 });
 
+public_users.get('/title/:title', async function (req, res) {
+    try {
+        const response = await axios.get(`https://localhost:5000/title/${encodeURIComponent(title)}`);
+        res.status(200).json(response.data);
+    } catch (error) {
+        res.status(404).json({ message: "Title not found", error: error.message});
+    }
+})
+
 //  Get book review
 public_users.get('/review/:isbn',function (req, res) {
     let book_index = parseInt(req.params.isbn, 10);
@@ -107,12 +121,9 @@ public_users.get('/review/:isbn',function (req, res) {
         if (Object.keys(books[book_index].reviews).length > 0) {
             return res.send(books[book_index].reviews);
         }
-        else {
-            return res.status(300).json({message: "No reviews yet"});
-        }
     }
     else {
-        return res.status(300).json({message: "ISBN not found"});
+        return res.status(404).json({message: `Book with ISBN ${book_index} not found.`});
     }
 });
 
