@@ -43,7 +43,7 @@ public_users.get('/', function (req, res) {
     return res.send(JSON.stringify(books, null, 4));
 });
 
-// Get the book list available in the shop
+// Task 10: Get the book list available in the shop using async/await + Axios
 public_users.get('/', async function (req, res) {
     try {
         const response = await axios.get('https://localhost:5000/');
@@ -64,6 +64,7 @@ public_users.get('/isbn/:isbn',function (req, res) {
     }
  });
 
+ // Task 11: Get book details based on ISBN using Promise and Axios
  public_users.get('/isbn/:isbn', async function (req, res) {
     const isbn = req.params.isbn;
 
@@ -80,15 +81,19 @@ public_users.get('/isbn/:isbn',function (req, res) {
   
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
-    const out_books = Object.fromEntries(
-        Object.entries(books).filter(([key, value]) => {
-            return (value.author === req.params.author);
-        }));
-    return res.send(JSON.stringify(out_books, null, 4));
+    const booksByAuthor = [];
+    for (const [key, value] of Object.entries(books)) {
+        if (value.author === req.params.author) {
+            booksByAuthor.push({ "isbn": key, "title": value.title, "reviews": value.reviews });
+        }
+    }
+    return res.send(JSON.stringify({ "booksByAuthor": booksByAuthor}, null, 4));
 });
 
+// Task 12: Get book details based on author using async/await + Axios
 public_users.get('/author/:author', async function (req, res) {
     try {
+        const author = req.params.author;
         const response = await axios.get(`https://localhost:5000/author/${encodeURIComponent(author)}`);
         res.status(200).json(response.data);
     } catch (error) {
@@ -98,15 +103,19 @@ public_users.get('/author/:author', async function (req, res) {
 
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
-    const out_books = Object.fromEntries(
-        Object.entries(books).filter(([key, value]) => {
-            return (value.title === req.params.title);
-        }));
-    return res.send(JSON.stringify(out_books, null, 4));
+    const booksByTitle = [];
+    for (const [key, value] of Object.entries(books)) {
+        if (value.title === req.params.title) {
+            booksByTitle.push({ "isbn": key, "author": value.author, "reviews": value.reviews });
+        }
+    }
+    return res.send(JSON.stringify({ "booksByTitle": booksByTitle}, null, 4));
 });
 
+// Task 13: Get book details based on title using async/await + Axios
 public_users.get('/title/:title', async function (req, res) {
     try {
+        const title = req.params.title;
         const response = await axios.get(`https://localhost:5000/title/${encodeURIComponent(title)}`);
         res.status(200).json(response.data);
     } catch (error) {
