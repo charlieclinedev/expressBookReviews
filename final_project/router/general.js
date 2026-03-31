@@ -118,9 +118,7 @@ public_users.get('/title/:title', async function (req, res) {
 public_users.get('/review/:isbn',function (req, res) {
     let book_index = parseInt(req.params.isbn, 10);
     if (books[book_index]) {
-        if (Object.keys(books[book_index].reviews).length > 0) {
-            return res.send(books[book_index].reviews);
-        }
+        return res.send(books[book_index].reviews);
     }
     else {
         return res.status(404).json({message: `Book with ISBN ${book_index} not found.`});
